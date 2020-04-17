@@ -1,0 +1,26 @@
+{
+  "name": "03_zen_garden",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "npm run build && node ./dist/script.js",
+    "watch": "tsc --watch",
+    "w": "npm run watch",
+	"generate": "node doc/generate_doc.js",
+	"g": "npm run generate"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/chalk": "^2.2.0",
+    "@types/node": "^13.11.1",
+    "chalk": "^4.0.0",
+    "typescript": "^3.8.3"
+  },
+  "dependencies": {
+    "markdown-pdf": "^10.0.0"
+  }
+}
