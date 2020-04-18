@@ -49,13 +49,25 @@ export default class Garden {
     generateMonks(): Monk[] {
         const monks: Monk[] = [];
 
+        // upper border
         for (let i = 0; i < this.y; i++)
             monks.push(new Monk({ x: 0, y: i }, Direction.DOWN, !!Math.round(Math.random())));
 
+        // bottom border
+        for (let i = 0; i < this.y; i++)
+            monks.push(
+                new Monk({ x: this.x - 1, y: i }, Direction.UP, !!Math.round(Math.random()))
+            );
+
+        // right border
         for (let i = 0; i < this.x; i++)
             monks.push(
                 new Monk({ x: i, y: this.y - 1 }, Direction.LEFT, !!Math.round(Math.random()))
             );
+
+        // left border
+        for (let i = 0; i < this.x; i++)
+            monks.push(new Monk({ x: i, y: 0 }, Direction.RIGHT, !!Math.round(Math.random())));
 
         // shuffle
         for (let i = monks.length - 1; i > 0; i--) {
@@ -65,7 +77,7 @@ export default class Garden {
             monks[j] = temp;
         }
 
-        return monks;
+        return monks.slice(0, this.x + this.y + this.rocks);
     }
 
     /**
