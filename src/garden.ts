@@ -1,5 +1,5 @@
 import chalk from 'chalk';
-import { Monk, Coordinates } from './monk';
+import { Monk, Statuses } from './monk';
 
 export default class Garden {
     public x: number;
@@ -9,7 +9,9 @@ export default class Garden {
     public monks: Monk[] = [];
     public garden: string[][];
 
-    constructor(garden: string[][]) {
+    constructor(garden: string[][]);
+    constructor(garden: string[][], monks: Monk[]);
+    constructor(garden?: string[][], monks?: Monk[]) {
         // Deep copy of array
         this.garden = JSON.parse(JSON.stringify(garden));
 
@@ -26,6 +28,7 @@ export default class Garden {
         }
 
         // Generate the pathways
+        this.monks = monks ?? this.generateMonks();
         this.walk();
         this.score = this.getScore();
     }
@@ -35,66 +38,36 @@ export default class Garden {
      */
     walk() {
         let walk = 1;
-        let trapped = false;
+        this.monks.forEach((monk) => {
+            if (
+                monk.walk(monk, this.garden, walk.toString()) ==
+                Statuses.SUCCESS
+            )
+                walk++;
+        });
+    }
 
-        while (!trapped && this.monks.length < this.getMaximumMonks()) {
-            // Create next starting position on the border
-            const monk = new Monk({ x: this.x, y: this.y });
-            // Check if the position is not occupied
-            if (this.garden[monk.position.x][monk.position.y] != '0') break;
+    /**
+     * Function generates random, not repeating starting positions for monks
+     */
+    generateMonks(): Monk[] {
+        const monks: Monk[] = [];
 
-            // Append inside the "genes" of this garden
-            this.monks.push(monk);
+        for (let i = 0; i < this.y; i++)
+            monks.push(new Monk({ x: 0, y: i }, 'V'));
 
-            while (this.garden[monk.position.x][monk.position.y] == '0') {
-                // Mark the position
-                this.garden[monk.position.x][monk.position.y] = walk.toString();
+        for (let i = 0; i < this.x; i++)
+            monks.push(new Monk({ x: i, y: this.y - 1 }, 'H'));
 
-                // Generate next step
-                let nextStep = monk.getNextStep();
-                if (!this.inBounds(nextStep)) break;
-
-                // If we hit the rock or another pathway
-                if (this.garden[nextStep.x][nextStep.y] != '0') {
-                    monk.direction = monk.direction == 'H' ? 'V' : 'H';
-                    nextStep = monk.getNextStep();
-
-                    // If event the turn wasn't successful, break
-                    if (
-                        !this.inBounds(nextStep) ||
-                        this.garden[nextStep.x][nextStep.y] != '0'
-                    ) {
-                        // The monk was trapped
-                        // and could not return to the border of garden
-                        trapped = true;
-                        break;
-                    }
-                }
-                monk.position = nextStep;
-            }
-            walk++;
+        // shuffle
+        for (let i = monks.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * i);
+            const temp = monks[i];
+            monks[i] = monks[j];
+            monks[j] = temp;
         }
-    }
 
-    /**
-     * Check whether coordinates are inside the garden
-     *
-     * @param position Coordinates, position of the monk
-     */
-    inBounds(position: Coordinates): boolean {
-        return (
-            position.x < this.x &&
-            position.x >= 0 &&
-            position.y < this.y &&
-            position.y >= 0
-        );
-    }
-
-    /**
-     * Get number of monks that should be generated
-     */
-    getMaximumMonks() {
-        return this.x + this.y + this.rocks;
+        return monks;
     }
 
     /**
