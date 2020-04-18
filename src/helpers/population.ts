@@ -16,6 +16,6 @@ export class Population {
     }
 }
 
-function random(min: number = 0, max: number): number {
+export function random(min: number = 0, max: number): number {
     return Math.floor(Math.random() * (max - min) + min);
 }
