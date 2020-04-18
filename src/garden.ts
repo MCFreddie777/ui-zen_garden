@@ -7,8 +7,13 @@ export default class Garden {
     public rocks: number;
     public score: number = 0;
     public monks: Monk[] = [];
+    public garden: string[][];
 
-    constructor(public garden: string[][]) {
+    constructor(garden: string[][]) {
+        // Deep copy of array
+        this.garden = JSON.parse(JSON.stringify(garden));
+
+        // Set dimensions
         this.x = this.garden.length;
         this.y = this.garden[0].length;
 
@@ -19,8 +24,15 @@ export default class Garden {
                 if (this.garden[i][j] == 'K') this.rocks++;
             }
         }
+
+        // Generate the pathways
+        this.walk();
+        this.score = this.getScore();
     }
 
+    /**
+     * Generates the pathways around the garden and calculates the score
+     */
     walk() {
         let walk = 1;
         let trapped = false;
@@ -28,16 +40,17 @@ export default class Garden {
         while (!trapped && this.monks.length < this.getMaximumMonks()) {
             // Create next starting position on the border
             const monk = new Monk({ x: this.x, y: this.y });
-
             // Check if the position is not occupied
             if (this.garden[monk.position.x][monk.position.y] != '0') break;
 
+            // Append inside the "genes" of this garden
             this.monks.push(monk);
 
             while (this.garden[monk.position.x][monk.position.y] == '0') {
                 // Mark the position
                 this.garden[monk.position.x][monk.position.y] = walk.toString();
 
+                // Generate next step
                 let nextStep = monk.getNextStep();
                 if (!this.inBounds(nextStep)) break;
 
@@ -51,6 +64,8 @@ export default class Garden {
                         !this.inBounds(nextStep) ||
                         this.garden[nextStep.x][nextStep.y] != '0'
                     ) {
+                        // The monk was trapped
+                        // and could not return to the border of garden
                         trapped = true;
                         break;
                     }
@@ -59,10 +74,13 @@ export default class Garden {
             }
             walk++;
         }
-
-        this.score = this.getScore();
     }
 
+    /**
+     * Check whether coordinates are inside the garden
+     *
+     * @param position Coordinates, position of the monk
+     */
     inBounds(position: Coordinates): boolean {
         return (
             position.x < this.x &&
@@ -72,6 +90,9 @@ export default class Garden {
         );
     }
 
+    /**
+     * Get number of monks that should be generated
+     */
     getMaximumMonks() {
         return this.x + this.y + this.rocks;
     }
