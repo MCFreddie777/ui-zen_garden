@@ -1,5 +1,5 @@
 import chalk from 'chalk';
-import { Monk, Statuses } from './monk';
+import { Direction, Monk, Statuses } from './monk';
 
 export default class Garden {
     public x: number;
@@ -39,11 +39,7 @@ export default class Garden {
     walk() {
         let walk = 1;
         this.monks.forEach((monk) => {
-            if (
-                monk.walk(monk, this.garden, walk.toString()) ==
-                Statuses.SUCCESS
-            )
-                walk++;
+            if (monk.walk(monk, this.garden, walk.toString()) == Statuses.SUCCESS) walk++;
         });
     }
 
@@ -54,10 +50,12 @@ export default class Garden {
         const monks: Monk[] = [];
 
         for (let i = 0; i < this.y; i++)
-            monks.push(new Monk({ x: 0, y: i }, 'V'));
+            monks.push(new Monk({ x: 0, y: i }, Direction.DOWN, !!Math.round(Math.random())));
 
         for (let i = 0; i < this.x; i++)
-            monks.push(new Monk({ x: i, y: this.y - 1 }, 'H'));
+            monks.push(
+                new Monk({ x: i, y: this.y - 1 }, Direction.LEFT, !!Math.round(Math.random()))
+            );
 
         // shuffle
         for (let i = monks.length - 1; i > 0; i--) {
@@ -77,8 +75,7 @@ export default class Garden {
         let score = 0;
         for (let i = 0; i < this.garden.length; i++) {
             for (let j = 0; j < this.garden[0].length; j++) {
-                if (this.garden[i][j] != '0' && this.garden[i][j] != 'K')
-                    score++;
+                if (this.garden[i][j] != '0' && this.garden[i][j] != 'K') score++;
             }
         }
         return score / (this.x * this.y);
@@ -100,9 +97,7 @@ export default class Garden {
                 if (element == '0') color = chalk.bgKeyword('goldenrod');
                 else if (element == 'K') color = chalk.bgKeyword('dimgray');
                 else color = chalk.bgKeyword('sienna');
-                process.stdout.write(
-                    color(` ${silent ? ' ' : element.padStart(2, ' ')} `)
-                );
+                process.stdout.write(color(` ${silent ? ' ' : element.padStart(2, ' ')} `));
             }
             process.stdout.write('\n');
         }

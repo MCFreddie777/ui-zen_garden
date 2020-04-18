@@ -1,5 +1,9 @@
 export class Monk {
-    constructor(public position: Coordinates, public direction: 'H' | 'V') {}
+    constructor(
+        public position: Coordinates,
+        public direction: Direction,
+        public turnDirection: boolean
+    ) {}
 
     /**
      * Recursive function which goes through the garden, trying to find the exit.
@@ -19,13 +23,14 @@ export class Monk {
             return Statuses.SUCCESS;
 
         // If hit rock or another pathway
-        if (garden[monk.position.x][monk.position.y] !== '0')
+        if (garden[monk.position.x][monk.position.y] !== '0') {
             return Statuses.TURN;
+        }
 
         for (let i = 0; i < 2; i++) {
             // Nest into next step
             const result: Statuses = monk.walk(
-                new Monk(monk.getNextStep(), monk.direction),
+                new Monk(monk.getNextStep(), monk.direction, monk.turnDirection),
                 garden,
                 mark
             );
@@ -37,7 +42,11 @@ export class Monk {
             }
             // Toggle direction
             else if (result === Statuses.TURN) {
-                monk.direction = monk.direction == 'H' ? 'V' : 'H';
+                if (monk.direction === Direction.UP || monk.direction === Direction.DOWN) {
+                    monk.direction = monk.turnDirection ? Direction.LEFT : Direction.RIGHT;
+                } else {
+                    monk.direction = monk.turnDirection ? Direction.UP : Direction.DOWN;
+                }
             }
             // Cannot mark the pathway, this gene failed
             else return Statuses.FAIL;
@@ -53,28 +62,35 @@ export class Monk {
      * @param size Size of the garden
      */
     inBounds(position: Coordinates, size: Coordinates): boolean {
-        return (
-            position.x < size.x &&
-            position.x >= 0 &&
-            position.y < size.y &&
-            position.y >= 0
-        );
+        return position.x < size.x && position.x >= 0 && position.y < size.y && position.y >= 0;
     }
 
     /**
      * Returns a position in Gaussian 2D coordinates of a next step according to currently set direction
      */
     getNextStep(): Coordinates {
-        if (this.direction == 'H')
-            return {
-                x: this.position.x,
-                y: this.position.y - 1,
-            };
-        else
-            return {
-                x: this.position.x + 1,
-                y: this.position.y,
-            };
+        switch (this.direction) {
+            case Direction.UP:
+                return {
+                    x: this.position.x - 1,
+                    y: this.position.y,
+                };
+            case Direction.DOWN:
+                return {
+                    x: this.position.x + 1,
+                    y: this.position.y,
+                };
+            case Direction.LEFT:
+                return {
+                    x: this.position.x,
+                    y: this.position.y - 1,
+                };
+            case Direction.RIGHT:
+                return {
+                    x: this.position.x,
+                    y: this.position.y + 1,
+                };
+        }
     }
 }
 
@@ -87,4 +103,11 @@ export enum Statuses {
     FAIL,
     SUCCESS,
     TURN,
+}
+
+export enum Direction {
+    UP,
+    RIGHT,
+    DOWN,
+    LEFT,
 }
