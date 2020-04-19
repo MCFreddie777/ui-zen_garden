@@ -92,7 +92,7 @@ export default class Garden {
                 if (this.garden[i][j] != '0' && this.garden[i][j] != 'K') score++;
             }
         }
-        return score / (this.x * this.y);
+        return score / (this.x * this.y - this.rocks);
     }
 
     /**

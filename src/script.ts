@@ -48,13 +48,6 @@ while (generations.actual < generations.max) {
         break;
     }
 
-    // Debug break the infinite loop
-    if (DEBUG) {
-        if (maximum.score >= 0.9084) {
-            break;
-        }
-    }
-
     const nextGeneration: Garden[] = [];
 
     // We gonna take the best of current population to the next generation
