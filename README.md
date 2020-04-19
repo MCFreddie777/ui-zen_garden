@@ -20,10 +20,6 @@ Pásy môžu ísť len vodorovne alebo zvislo, nikdy nie šikmo. Začína vždy 
 
 <div style="page-break-after: always;"></div>
 
-## Implementácia
-
-<div style="page-break-after: always;"></div>
-
 ## Inštalácia
 
 Prerekvizity:
@@ -43,15 +39,4 @@ A následne, pre každú transpiláciu typescriptového kódu na javascript a sp
 npm run dev
 ```
 
-<div style="page-break-after: always;"></div>
-
-## Algoritmus
-
-<div style="page-break-after: always;"></div>
-
-## Riešenie
-
-<div style="page-break-after: always;"></div>
-
-## Záver
 
