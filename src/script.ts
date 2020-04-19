@@ -2,15 +2,16 @@ import Garden from './garden';
 import input from './input/test1';
 import { Population, random } from './helpers/population';
 import { Direction, Monk } from './monk';
+import { cloneDeep, shuffle } from 'lodash';
 
 const DEBUG = true;
-const startPopulation = 200;
+const startPopulation = 100;
 let population: Garden[] = [];
 const generations = {
     actual: 1,
     max: 1000,
 };
-const mutationChance = 0.4;
+const mutationChance = 0.1;
 
 // Generate first starting population
 for (let i = 0; i < startPopulation; i++) {
@@ -18,11 +19,11 @@ for (let i = 0; i < startPopulation; i++) {
 }
 
 while (generations.actual < generations.max) {
-    // Check if the whole garden is raked in this population
     let maximum = {
         score: 0,
         index: -1,
     };
+
     population.forEach((specimen, index) => {
         if (specimen.score > maximum.score) {
             maximum.score = specimen.score;
@@ -34,19 +35,17 @@ while (generations.actual < generations.max) {
         console.log(`[Generation ${generations.actual}] Max: ${maximum.score}`);
     }
 
+    // Check if the whole garden is raked in this population
     if (maximum.score === 1) {
         break;
     }
 
     const nextGeneration: Garden[] = [];
 
-    population.forEach((specimen, iteration) => {
-        // We gonna take the best of current population to the next generation
-        if (iteration == 0) {
-            nextGeneration.push(population[maximum.index]);
-            return;
-        }
+    // We gonna take the best of current population to the next generation
+    nextGeneration.push(cloneDeep<Garden>(population[maximum.index]));
 
+    population.forEach((specimen) => {
         // Get two parents according to algorithm
         const parentA = Population.getRandom('tournament', population);
         const parentB = Population.getRandom('tournament', population);
@@ -74,7 +73,7 @@ while (generations.actual < generations.max) {
         } else if (rnd >= 0.6 && rnd < 0.9) {
             for (let i = 0; i <= specimen.monks.length - 2; i += 2) {
                 childMonks.push(parentA.monks[i]);
-                childMonks.push(parentA.monks[i + 1]);
+                childMonks.push(parentB.monks[i + 1]);
             }
 
             // No crossover
@@ -99,11 +98,21 @@ while (generations.actual < generations.max) {
                     childMonks[index].direction === Direction.UP ||
                     childMonks[index].direction === Direction.DOWN
                 ) {
-                    childMonks[index].position.y =
-                        (childMonks[index].position.y + 1) % (specimen.y + 1);
+                    // handle the border ones
+                    if (
+                        childMonks[index].position.y !== 0 &&
+                        childMonks[index].position.y !== specimen.y - 1
+                    )
+                        childMonks[index].position.y =
+                            (childMonks[index].position.y + 1) % specimen.y;
                 } else {
-                    childMonks[index].position.x =
-                        (childMonks[index].position.x + 1) % (specimen.x + 1);
+                    // handle the border ones
+                    if (
+                        childMonks[index].position.x !== 0 &&
+                        childMonks[index].position.x !== specimen.x - 1
+                    )
+                        childMonks[index].position.x =
+                            (childMonks[index].position.x + 1) % specimen.x;
                 }
             }
 
@@ -113,18 +122,36 @@ while (generations.actual < generations.max) {
                     childMonks[index].direction === Direction.UP ||
                     childMonks[index].direction === Direction.DOWN
                 ) {
-                    childMonks[index].position.y =
-                        (childMonks[index].position.y * 2) % (specimen.y + 1);
+                    // handle the border ones
+                    if (
+                        childMonks[index].position.y !== 0 &&
+                        childMonks[index].position.y !== specimen.y - 1
+                    )
+                        childMonks[index].position.y =
+                            (childMonks[index].position.y * 2) % specimen.y;
                 } else {
-                    childMonks[index].position.x =
-                        (childMonks[index].position.x * 2) % (specimen.x + 1);
+                    // handle the border ones
+                    if (
+                        childMonks[index].position.x !== 0 &&
+                        childMonks[index].position.x !== specimen.x - 1
+                    )
+                        childMonks[index].position.x =
+                            (childMonks[index].position.x * 2) % specimen.x;
                 }
+            }
+
+            // Shuffle the genes
+            if (Math.random() > mutationChance) {
+                childMonks = shuffle(childMonks);
             }
         });
 
         // Push the newly created child into the new generation
         nextGeneration.push(new Garden(input, childMonks));
     });
+
+    // we took the best one, so we need to remove one specimen
+    nextGeneration.pop();
 
     // replace the old population with the new generation
     population = nextGeneration;
@@ -138,6 +165,9 @@ population.sort((a, b) => {
     return a.score - b.score;
 });
 
-// Print the best specimen
+if (DEBUG) {
+    console.log('Best monks: ', population[population.length - 1].monks);
+}
+
 console.log(`Best score: ${population[population.length - 1].score}`);
 population[population.length - 1].print();

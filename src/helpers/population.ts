@@ -1,4 +1,5 @@
 import Garden from '../garden';
+import { cloneDeep } from 'lodash';
 
 export class Population {
     static getRandom(
@@ -6,8 +7,8 @@ export class Population {
         population: Garden[]
     ) {
         if (algorithm === 'tournament') {
-            const a = population[random(0, population.length)];
-            const b = population[random(0, population.length)];
+            const a = cloneDeep<Garden>(population[random(0, population.length)]);
+            const b =  cloneDeep<Garden>(population[random(0, population.length)]);
             return a.score > b.score ? a : b;
         } else {
             // TODO: roulette

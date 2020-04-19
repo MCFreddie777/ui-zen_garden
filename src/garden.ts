@@ -1,5 +1,6 @@
 import chalk from 'chalk';
 import { Direction, Monk, Statuses } from './monk';
+import { cloneDeep } from 'lodash';
 
 export default class Garden {
     public x: number;
@@ -13,7 +14,7 @@ export default class Garden {
     constructor(garden: string[][], monks: Monk[]);
     constructor(garden?: string[][], monks?: Monk[]) {
         // Deep copy of array
-        this.garden = JSON.parse(JSON.stringify(garden));
+        this.garden = cloneDeep<string[][]>(garden!);
 
         // Set dimensions
         this.x = this.garden.length;
@@ -39,7 +40,8 @@ export default class Garden {
     walk() {
         let walk = 1;
         this.monks.forEach((monk) => {
-            if (monk.walk(monk, this.garden, walk.toString()) == Statuses.SUCCESS) walk++;
+            if (monk.walk(cloneDeep<Monk>(monk), this.garden, walk.toString()) === Statuses.SUCCESS)
+                walk++;
         });
     }
 
