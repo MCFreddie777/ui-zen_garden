@@ -17,10 +17,12 @@
     "license": "ISC",
     "devDependencies": {
         "@types/chalk": "^2.2.0",
+        "@types/lodash": "^4.14.150",
         "@types/node": "^13.11.1",
         "chalk": "^4.0.0",
-        "typescript": "^3.8.3",
+        "lodash": "^4.17.15",
+        "markdown-pdf": "^10.0.0",
         "prettier": "^2.0.4",
-        "markdown-pdf": "^10.0.0"
+        "typescript": "^3.8.3"
     }
 }
