@@ -4,20 +4,21 @@ import { Population, random } from './helpers/population';
 import { Direction, Monk } from './monk';
 import { cloneDeep, shuffle } from 'lodash';
 
-const DEBUG = true;
+const DEBUG = false;
 const startPopulation = 50;
 let population: Garden[] = [];
 const generations = {
     actual: 1,
     max: 1000,
 };
-const mutationChance = 0.1;
+const mutationChance = 0.2;
 
 // Generate first starting population
 for (let i = 0; i < startPopulation; i++) {
     population.push(new Garden(input));
 }
 
+// while (true) {
 while (generations.actual < generations.max) {
     // Statistics for actual generation
     const maximum = {
@@ -40,15 +41,18 @@ while (generations.actual < generations.max) {
         }
     });
 
-    if (DEBUG) {
-        console.log(
-            `[Generation ${generations.actual}] Max: ${maximum.score} Min: ${minimum.score}`
-        );
-    }
+    console.log(`[Generation ${generations.actual}] Max: ${maximum.score} Min: ${minimum.score}`);
 
     // Check if the whole garden is raked in this population
     if (maximum.score === 1) {
         break;
+    }
+
+    // Debug break the infinite loop
+    if (DEBUG) {
+        if (maximum.score >= 0.9084) {
+            break;
+        }
     }
 
     const nextGeneration: Garden[] = [];
@@ -93,67 +97,73 @@ while (generations.actual < generations.max) {
         }
 
         childMonks.forEach((_monk, index) => {
-            // Mutate genes by inserting random gene
             if (Math.random() > mutationChance) {
-                childMonks[index] = specimen.generateMonks()[random(0, specimen.x + specimen.y)];
-            }
+                const rnd = Math.random();
 
-            // Toggle turn direction of the gene
-            if (Math.random() > mutationChance) {
-                childMonks[index].turnDirection = !childMonks[index].turnDirection;
-            }
-
-            // Increase and modulo the position of the child gene
-            if (Math.random() > mutationChance) {
-                if (
-                    childMonks[index].direction === Direction.UP ||
-                    childMonks[index].direction === Direction.DOWN
-                ) {
-                    // handle the border ones
-                    if (
-                        childMonks[index].position.y !== 0 &&
-                        childMonks[index].position.y !== specimen.y - 1
-                    )
-                        childMonks[index].position.y =
-                            (childMonks[index].position.y + 1) % specimen.y;
-                } else {
-                    // handle the border ones
-                    if (
-                        childMonks[index].position.x !== 0 &&
-                        childMonks[index].position.x !== specimen.x - 1
-                    )
-                        childMonks[index].position.x =
-                            (childMonks[index].position.x + 1) % specimen.x;
+                // Mutate genes by inserting random gene
+                if (rnd < 0.2) {
+                    childMonks[index] = specimen.generateMonks()[
+                        random(0, specimen.x + specimen.y)
+                    ];
                 }
-            }
 
-            // Double and modulo the position of the child gene
-            if (Math.random() > mutationChance) {
-                if (
-                    childMonks[index].direction === Direction.UP ||
-                    childMonks[index].direction === Direction.DOWN
-                ) {
-                    // handle the border ones
-                    if (
-                        childMonks[index].position.y !== 0 &&
-                        childMonks[index].position.y !== specimen.y - 1
-                    )
-                        childMonks[index].position.y =
-                            (childMonks[index].position.y * 2) % specimen.y;
-                } else {
-                    // handle the border ones
-                    if (
-                        childMonks[index].position.x !== 0 &&
-                        childMonks[index].position.x !== specimen.x - 1
-                    )
-                        childMonks[index].position.x =
-                            (childMonks[index].position.x * 2) % specimen.x;
+                // Toggle turn direction of the gene
+                if (rnd >= 0.2 && rnd < 0.4) {
+                    childMonks[index].turnDirection = !childMonks[index].turnDirection;
                 }
-            }
 
-            // Shuffle the genes
-            if (Math.random() > mutationChance) {
-                childMonks = shuffle(childMonks);
+                // Increase and modulo the position of the child gene
+                if (rnd >= 0.4 && rnd < 0.6) {
+                    if (
+                        childMonks[index].direction === Direction.UP ||
+                        childMonks[index].direction === Direction.DOWN
+                    ) {
+                        // handle the border ones
+                        if (
+                            childMonks[index].position.y !== 0 &&
+                            childMonks[index].position.y !== specimen.y - 1
+                        )
+                            childMonks[index].position.y =
+                                (childMonks[index].position.y + 1) % specimen.y;
+                    } else {
+                        // handle the border ones
+                        if (
+                            childMonks[index].position.x !== 0 &&
+                            childMonks[index].position.x !== specimen.x - 1
+                        )
+                            childMonks[index].position.x =
+                                (childMonks[index].position.x + 1) % specimen.x;
+                    }
+                }
+
+                // Double and modulo the position of the child gene
+                if (rnd >= 0.6 && rnd < 0.8) {
+                    if (
+                        childMonks[index].direction === Direction.UP ||
+                        childMonks[index].direction === Direction.DOWN
+                    ) {
+                        // handle the border ones
+                        if (
+                            childMonks[index].position.y !== 0 &&
+                            childMonks[index].position.y !== specimen.y - 1
+                        )
+                            childMonks[index].position.y =
+                                (childMonks[index].position.y * 2) % specimen.y;
+                    } else {
+                        // handle the border ones
+                        if (
+                            childMonks[index].position.x !== 0 &&
+                            childMonks[index].position.x !== specimen.x - 1
+                        )
+                            childMonks[index].position.x =
+                                (childMonks[index].position.x * 2) % specimen.x;
+                    }
+                }
+
+                // Shuffle the genes
+                if (rnd >= 0.8) {
+                    childMonks = shuffle(childMonks);
+                }
             }
         });
 
