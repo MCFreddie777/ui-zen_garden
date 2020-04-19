@@ -5,7 +5,7 @@ import { Direction, Monk } from './monk';
 import { cloneDeep, shuffle } from 'lodash';
 
 const DEBUG = true;
-const startPopulation = 100;
+const startPopulation = 50;
 let population: Garden[] = [];
 const generations = {
     actual: 1,
@@ -19,8 +19,13 @@ for (let i = 0; i < startPopulation; i++) {
 }
 
 while (generations.actual < generations.max) {
-    let maximum = {
+    // Statistics for actual generation
+    const maximum = {
         score: 0,
+        index: -1,
+    };
+    const minimum = {
+        score: 1,
         index: -1,
     };
 
@@ -29,10 +34,16 @@ while (generations.actual < generations.max) {
             maximum.score = specimen.score;
             maximum.index = index;
         }
+        if (specimen.score < minimum.score) {
+            minimum.score = specimen.score;
+            minimum.index = index;
+        }
     });
 
     if (DEBUG) {
-        console.log(`[Generation ${generations.actual}] Max: ${maximum.score}`);
+        console.log(
+            `[Generation ${generations.actual}] Max: ${maximum.score} Min: ${minimum.score}`
+        );
     }
 
     // Check if the whole garden is raked in this population
